@@ -1,1 +1,1 @@
-rootProject.name = "leadger.pluse"
+rootProject.name = "ledger.pulse"

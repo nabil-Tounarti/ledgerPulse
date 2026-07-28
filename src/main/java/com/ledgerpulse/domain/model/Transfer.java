@@ -6,9 +6,12 @@ import java.util.List;
 import com.ledgerpulse.domain.events.*;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import static com.ledgerpulse.domain.model.TransferId.newId;
 
 @AllArgsConstructor
+@Getter
 public class Transfer {
   TransferId TransferId;
   AccountId sender;
@@ -37,14 +40,25 @@ public class Transfer {
     requireStatus(TransferStatus.FRAUD_CHECKED);
   }
 
+  public void complete() {
+    requireStatus(TransferStatus.COMPLIANCE_CHECKED);
+    pendingEvents.add(new TransferCompleted(this.TransferId, this.sender, this.receiver, this.amount, this.createdAt));
+  }
+
+  public void fail() {
+    requireStatus(TransferStatus.COMPLIANCE_CHECKED);
+    pendingEvents.add(new TransferRejected(this.TransferId, this.sender, this.createdAt));
+  }
+
   private void requireStatus(TransferStatus status) {
     if (this.status.equals(status)) {
       throw new IllegalArgumentException("the requiredStatus is not satisfaying , i am in requireStatus function");
     }
   }
 
-  public void complete() {
-    requireStatus(TransferStatus.COMPLIANCE_CHECKED);
-    pendingEvents.add(TransferCompleted)
+  public List<DomainEvent> pullEvents() {
+    List<DomainEvent> events = List.copyOf(pendingEvents);
+    events.clear();
+    return events;
   }
 }

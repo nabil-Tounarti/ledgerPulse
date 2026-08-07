@@ -16,5 +16,3 @@ public class VirtualThreadCheckController {
   public record ThreadCheckResponse(boolean isVirtual, String threadName) {
   }
 }
-
-

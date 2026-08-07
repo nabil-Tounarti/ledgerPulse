@@ -22,14 +22,16 @@ public class Transfer {
 
   public final List<DomainEvent> pendingEvents = new ArrayList<>();
 
-  public Transfer initiate(Account sender, Account receiver, Money amount) {
-    final Transfer t = new Transfer(newId(), sender.getId(), receiver.getId(),
-        amount,
-        TransferStatus.INITIATED,
-        Instant.now());
+  public Transfer(AccountId sender, AccountId receiver, Money amount) {
+    this.TransferId = newId();
+    this.sender = sender;
+    this.receiver = receiver;
+    this.amount = amount;
+    this.status = TransferStatus.INITIATED;
+    this.createdAt = Instant.now();
 
-    pendingEvents.add(new TransferInitiated(t.TransferId, t.sender, t.receiver, t.amount, t.createdAt));
-    return t;
+    this.pendingEvents
+        .add(new TransferInitiated(this.TransferId, this.sender, this.receiver, this.amount, this.createdAt));
   }
 
   public void markFraudChecked() {

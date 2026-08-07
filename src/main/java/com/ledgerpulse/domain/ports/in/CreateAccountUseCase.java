@@ -1,8 +1,9 @@
 
 package com.ledgerpulse.domain.ports.in;
 
-import com.ledgerpulse.domain.model.Account;
+import com.ledgerpulse.application.command.CreatAccountCommand;
+import com.ledgerpulse.application.dto.AccountResponse;
 
 public interface CreateAccountUseCase {
-  void createAccount(Account account);
+  AccountResponse createAccount(CreatAccountCommand command);
 }

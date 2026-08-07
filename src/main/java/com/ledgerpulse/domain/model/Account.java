@@ -6,17 +6,19 @@ import lombok.Getter;
 public class Account {
 
   private final AccountId id;
+  private final String userName;
   private Money balance;
 
-  public Account(AccountId id, Money balance) {
+  public Account(AccountId id, Money balance, String userName) {
     this.id = id;
     this.balance = balance;
+    this.userName = userName;
   }
 
   // Business invariant lives HERE, not in a service — this is what makes it DDD
   // rather than an anemic model. The aggregate is the only thing allowed to
   // mutate its own balance, and it refuses invalid state transitions.
-  public void debit(Money amount) {
+  public void debit(Money amount) throws IllegalArgumentException {
     if (!balance.isGreaterThanOrEqual(amount)) {
       throw new IllegalArgumentException(
           String.format("Insufficient funds: id=%s, amount=%s, balance=%s", id, amount, balance));
@@ -28,11 +30,4 @@ public class Account {
     balance = balance.add(amount);
   }
 
-  public AccountId id() {
-    return id;
-  }
-
-  public Money balance() {
-    return balance;
-  }
 }

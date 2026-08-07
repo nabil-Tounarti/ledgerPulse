@@ -7,7 +7,7 @@ import java.util.Optional;
 import com.ledgerpulse.domain.model.Account;
 
 public interface AccountRepository {
-  Optional<AccountRepository> findById(AccountId id);
+  Optional<Account> findById(AccountId id);
 
   void save(Account account);
 }

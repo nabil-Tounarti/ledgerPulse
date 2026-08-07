@@ -1,7 +1,8 @@
 package com.ledgerpulse.domain.ports.in;
 
-import com.ledgerpulse.domain.model.Transfer;
+import com.ledgerpulse.application.command.CreateTransferCommand;
+import com.ledgerpulse.application.dto.TransferResponse;
 
 public interface CreateTransferUseCase {
-  void createTransfer(Transfer transfer);
+  TransferResponse createTransfer(CreateTransferCommand command);
 }

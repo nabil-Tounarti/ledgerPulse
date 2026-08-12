@@ -13,17 +13,17 @@ import static com.ledgerpulse.domain.model.TransferId.newId;
 @AllArgsConstructor
 @Getter
 public class Transfer {
-  TransferId TransferId;
-  AccountId sender;
-  AccountId receiver;
-  Money amount;
-  TransferStatus status;
-  Instant createdAt;
+  private TransferId transferId;
+  private AccountId sender;
+  private AccountId receiver;
+  private Money amount;
+  private TransferStatus status;
+  private Instant createdAt;
 
-  public final List<DomainEvent> pendingEvents = new ArrayList<>();
+  private final List<DomainEvent> pendingEvents = new ArrayList<>();
 
   public Transfer(AccountId sender, AccountId receiver, Money amount) {
-    this.TransferId = newId();
+    this.transferId = newId();
     this.sender = sender;
     this.receiver = receiver;
     this.amount = amount;
@@ -31,36 +31,40 @@ public class Transfer {
     this.createdAt = Instant.now();
 
     this.pendingEvents
-        .add(new TransferInitiated(this.TransferId, this.sender, this.receiver, this.amount, this.createdAt));
+        .add(new TransferInitiated(this.transferId, this.sender, this.receiver, this.amount, this.createdAt));
   }
 
   public void markFraudChecked() {
     requireStatus(TransferStatus.INITIATED);
+    this.status = TransferStatus.FRAUD_CHECKED;
   }
 
   public void markComplianceChecked() {
     requireStatus(TransferStatus.FRAUD_CHECKED);
+    this.status = TransferStatus.COMPLIANCE_CHECKED;
   }
 
   public void complete() {
     requireStatus(TransferStatus.COMPLIANCE_CHECKED);
-    pendingEvents.add(new TransferCompleted(this.TransferId, this.sender, this.receiver, this.amount, this.createdAt));
+    this.status = TransferStatus.COMPLETED;
+    pendingEvents.add(new TransferCompleted(this.transferId, this.sender, this.receiver, this.amount, this.createdAt));
   }
 
   public void fail() {
     requireStatus(TransferStatus.COMPLIANCE_CHECKED);
-    pendingEvents.add(new TransferRejected(this.TransferId, this.sender, this.createdAt));
+    this.status = TransferStatus.REJECTED;
+    pendingEvents.add(new TransferRejected(this.transferId, this.sender, this.createdAt));
   }
 
   private void requireStatus(TransferStatus status) {
-    if (this.status.equals(status)) {
+    if (!this.status.equals(status)) {
       throw new IllegalArgumentException("the requiredStatus is not satisfaying , i am in requireStatus function");
     }
   }
 
   public List<DomainEvent> pullEvents() {
     List<DomainEvent> events = List.copyOf(pendingEvents);
-    events.clear();
+    pendingEvents.clear();
     return events;
   }
 }

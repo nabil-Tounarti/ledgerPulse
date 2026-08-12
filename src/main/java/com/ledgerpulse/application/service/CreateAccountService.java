@@ -5,7 +5,7 @@ import java.util.Currency;
 
 import org.springframework.stereotype.Service;
 
-import com.ledgerpulse.application.command.CreatAccountCommand;
+import com.ledgerpulse.application.command.CreateAccountCommand;
 import com.ledgerpulse.application.dto.AccountResponse;
 import com.ledgerpulse.domain.model.Account;
 import com.ledgerpulse.domain.model.AccountId;
@@ -21,7 +21,7 @@ public class CreateAccountService implements CreateAccountUseCase {
   private final AccountRepository accountRepository;
 
   @Override
-  public AccountResponse createAccount(CreatAccountCommand command) {
+  public AccountResponse createAccount(CreateAccountCommand command) {
     Money ammount = new Money(BigDecimal.ZERO, Currency.getInstance("EUR"));
     Account account = new Account(AccountId.newId(), ammount, command.userName());
     accountRepository.save(account);

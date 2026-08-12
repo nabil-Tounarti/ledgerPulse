@@ -6,8 +6,8 @@ import lombok.Getter;
 public class Account {
 
   private final AccountId id;
-  private final String userName;
   private Money balance;
+  private final String userName;
 
   public Account(AccountId id, Money balance, String userName) {
     this.id = id;

@@ -1,4 +1,4 @@
-package com.ledgerpulse.infra.adapters.in;
+package com.ledgerpulse.application.request;
 
 /**
  * CreateAccountRequest

@@ -1,16 +1,13 @@
 package com.ledgerpulse.infra.adapters.out;
 
 import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.ledgerpulse.domain.model.Account;
 import com.ledgerpulse.domain.model.AccountId;
 import com.ledgerpulse.domain.ports.out.AccountRepository;
-import com.ledgerpulse.infra.persistence.entity.AccountEntityJpa;
 import com.ledgerpulse.infra.persistence.mapper.AccountMapper;
+import com.ledgerpulse.infra.persistence.repository.JpaAccountRepository;
 
 import lombok.AllArgsConstructor;
 
@@ -18,7 +15,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class AccountRepositoryAdapter implements AccountRepository {
 
-  private final JpaRepository<AccountEntityJpa, UUID> accountRepository;
+  private final JpaAccountRepository accountRepository;
   private final AccountMapper accountMapper;
 
   @Override
@@ -29,6 +26,11 @@ public class AccountRepositoryAdapter implements AccountRepository {
   @Override
   public void save(Account account) {
     accountRepository.save(accountMapper.toEntity(account));
+  }
+
+  @Override
+  public Optional<Account> findByUserName(String username) {
+    return Optional.of(accountMapper.toDomain(accountRepository.findByUserName(username).get()));
   }
 
 }

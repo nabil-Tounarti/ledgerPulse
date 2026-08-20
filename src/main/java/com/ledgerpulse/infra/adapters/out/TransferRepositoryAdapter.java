@@ -1,9 +1,7 @@
 package com.ledgerpulse.infra.adapters.out;
 
 import java.util.Optional;
-import java.util.UUID;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.ledgerpulse.domain.model.Transfer;
@@ -11,6 +9,7 @@ import com.ledgerpulse.domain.model.TransferId;
 import com.ledgerpulse.domain.ports.out.TransferRepository;
 import com.ledgerpulse.infra.persistence.entity.TransferEntityJpa;
 import com.ledgerpulse.infra.persistence.mapper.TransferMapper;
+import com.ledgerpulse.infra.persistence.repository.JpaTransferRepository;
 
 import lombok.AllArgsConstructor;
 
@@ -18,7 +17,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class TransferRepositoryAdapter implements TransferRepository {
 
-  private final JpaRepository<TransferEntityJpa, UUID> transferRepository;
+  private final JpaTransferRepository transferRepository;
   private final TransferMapper transferMapper;
 
   @Override

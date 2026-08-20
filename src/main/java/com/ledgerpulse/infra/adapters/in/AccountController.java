@@ -6,7 +6,11 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ledgerpulse.application.command.CreateAccountCommand;
 import com.ledgerpulse.application.dto.AccountResponse;
+import com.ledgerpulse.application.request.CreateAccountRequest;
+import com.ledgerpulse.domain.model.Account;
 import com.ledgerpulse.domain.ports.in.CreateAccountUseCase;
+import com.ledgerpulse.domain.ports.in.GetAccountUseCase;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -15,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class AccountController {
 
   private final CreateAccountUseCase createAccountUseCase;
+  private final GetAccountUseCase getAccountUseCase;
 
   @PostMapping
   public ResponseEntity<AccountResponse> createAccount(
@@ -28,5 +33,17 @@ public class AccountController {
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(response);
+  }
+
+  @GetMapping("/{username}")
+  ResponseEntity<AccountResponse> getAccount(@PathVariable String username) {
+    try {
+      final Account account = getAccountUseCase.getAccount(username);
+      final AccountResponse accountResponse = new AccountResponse(account.getId().id(), account.getUserName(),
+          account.getBalance().amount());
+      return ResponseEntity.status(HttpStatus.FOUND).body(accountResponse);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
   }
 }

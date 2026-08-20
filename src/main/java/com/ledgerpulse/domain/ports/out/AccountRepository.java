@@ -9,5 +9,7 @@ import com.ledgerpulse.domain.model.Account;
 public interface AccountRepository {
   Optional<Account> findById(AccountId id);
 
+  Optional<Account> findByUserName(String username);
+
   void save(Account account);
 }

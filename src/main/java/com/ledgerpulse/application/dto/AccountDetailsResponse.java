@@ -1,4 +1,4 @@
-package com.ledgerpulse.infra.adapters.in;
+package com.ledgerpulse.application.dto;
 
 import java.math.BigDecimal;
 

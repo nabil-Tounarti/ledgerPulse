@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.ledgerpulse.application.command.CreateAccountCommand;
+import com.ledgerpulse.application.dto.AccountDetailsResponse;
 import com.ledgerpulse.application.dto.AccountResponse;
 import com.ledgerpulse.application.request.CreateAccountRequest;
 import com.ledgerpulse.domain.model.Account;
@@ -36,10 +37,11 @@ public class AccountController {
   }
 
   @GetMapping("/{username}")
-  ResponseEntity<AccountResponse> getAccount(@PathVariable String username) {
+  ResponseEntity<AccountDetailsResponse> getAccount(@PathVariable String username) {
     try {
       final Account account = getAccountUseCase.getAccount(username);
-      final AccountResponse accountResponse = new AccountResponse(account.getId().id(), account.getUserName(),
+      final AccountDetailsResponse accountResponse = new AccountDetailsResponse(
+          account.getUserName(),
           account.getBalance().amount());
       return ResponseEntity.status(HttpStatus.FOUND).body(accountResponse);
     } catch (Exception e) {

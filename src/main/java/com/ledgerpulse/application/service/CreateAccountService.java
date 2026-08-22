@@ -22,7 +22,7 @@ public class CreateAccountService implements CreateAccountUseCase {
 
   @Override
   public AccountResponse createAccount(CreateAccountCommand command) {
-    Money ammount = new Money(BigDecimal.ZERO, Currency.getInstance("EUR"));
+    Money ammount = new Money(BigDecimal.valueOf(1000), Currency.getInstance("EUR"));
     Account account = new Account(AccountId.newId(), ammount, command.userName());
     accountRepository.save(account);
     return new AccountResponse(account.getId().id(), account.getUserName(), account.getBalance().amount());

@@ -1,7 +1,7 @@
 package com.ledgerpulse.domain.ports.in;
 
-import com.ledgerpulse.domain.model.Account;
+import com.ledgerpulse.application.dto.AccountDetailsResponse;
 
 public interface GetAccountUseCase {
-  Account getAccount(String username);
+  AccountDetailsResponse getAccount(String username);
 }

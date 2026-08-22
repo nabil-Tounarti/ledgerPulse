@@ -8,7 +8,6 @@ import com.ledgerpulse.application.command.CreateAccountCommand;
 import com.ledgerpulse.application.dto.AccountDetailsResponse;
 import com.ledgerpulse.application.dto.AccountResponse;
 import com.ledgerpulse.application.request.CreateAccountRequest;
-import com.ledgerpulse.domain.model.Account;
 import com.ledgerpulse.domain.ports.in.CreateAccountUseCase;
 import com.ledgerpulse.domain.ports.in.GetAccountUseCase;
 
@@ -39,10 +38,8 @@ public class AccountController {
   @GetMapping("/{username}")
   ResponseEntity<AccountDetailsResponse> getAccount(@PathVariable String username) {
     try {
-      final Account account = getAccountUseCase.getAccount(username);
-      final AccountDetailsResponse accountResponse = new AccountDetailsResponse(
-          account.getUserName(),
-          account.getBalance().amount());
+      getAccountUseCase.getAccount(username);
+      final AccountDetailsResponse accountResponse = getAccountUseCase.getAccount(username);
       return ResponseEntity.status(HttpStatus.FOUND).body(accountResponse);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

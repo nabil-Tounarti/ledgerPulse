@@ -17,7 +17,7 @@ public class AccountEntityJpa {
   @Column(name = "id")
   private UUID id;
 
-  @Column(name = "username", nullable = false)
+  @Column(name = "username", nullable = false, unique = true)
   private String userName;
 
   @Column(name = "balance", nullable = false, precision = 19, scale = 2)

@@ -12,4 +12,6 @@ public interface AccountRepository {
   Optional<Account> findByUserName(String username);
 
   void save(Account account);
+
+  void update(Account account);
 }

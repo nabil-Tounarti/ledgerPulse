@@ -34,8 +34,8 @@ public record Money(BigDecimal amount, Currency currency) {
   }
 
   private void requireSameCurrency(Money other) {
-    if (this.currency.equals(other.currency)) {
-      throw new UnsupportedOperationException("Unimplemented method 'requireSameCurrency'");
+    if (!this.currency.equals(other.currency)) {
+      throw new UnsupportedOperationException("the accounts dont have the same currency");
     }
   }
 

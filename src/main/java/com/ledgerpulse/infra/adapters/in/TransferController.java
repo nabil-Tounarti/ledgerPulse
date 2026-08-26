@@ -3,9 +3,9 @@ package com.ledgerpulse.infra.adapters.in;
 import com.ledgerpulse.application.command.CreateTransferCommand;
 import com.ledgerpulse.application.dto.TransferResponse;
 import com.ledgerpulse.application.request.TransferRequest;
+import com.ledgerpulse.application.service.TransferRetryHandler;
 import com.ledgerpulse.domain.model.AccountId;
 import com.ledgerpulse.domain.model.Money;
-import com.ledgerpulse.domain.ports.in.CreateTransferUseCase;
 
 import java.util.Currency;
 
@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/transfer")
 public class TransferController {
-  private final CreateTransferUseCase createTransferUseCase;
+  private final TransferRetryHandler transferRetryHandler;
 
   @PostMapping
   ResponseEntity<TransferResponse> createTransfer(@RequestBody TransferRequest request) {
@@ -30,9 +30,10 @@ public class TransferController {
         new AccountId(request.destenatioAccountId()),
         new Money(request.amount(), Currency.getInstance(request.currency())));
     try {
-      final TransferResponse transferResponse = createTransferUseCase.createTransfer(command);
+      final TransferResponse transferResponse = transferRetryHandler.transfer(command);
       return ResponseEntity.status(HttpStatus.ACCEPTED).body(transferResponse);
     } catch (Exception e) {
+      e.printStackTrace();
       return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).build();
     }
   }

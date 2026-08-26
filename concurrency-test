@@ -1,0 +1,106 @@
+#!/bin/bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo -e "${YELLOW}=== CONCURRENCY TEST LEDGERPULSE ===${NC}"
+echo ""
+
+echo -e "${YELLOW}Fetching account IDs...${NC}"
+NABIL_ID=$(curl -s http://localhost:8080/api/accounts/nabil | jq -r '.id')
+TOUNARTI_ID=$(curl -s http://localhost:8080/api/accounts/tounarti | jq -r '.id')
+
+if [ -z "$NABIL_ID" ] || [ -z "$TOUNARTI_ID" ]; then
+  echo -e "${RED}Error: Could not fetch account IDs. Make sure accounts exist.${NC}"
+  echo "Create them first with:"
+  echo "  curl -X POST http://localhost:8080/api/accounts -H 'Content-Type: application/json' -d '{\"username\":\"nabil\"}'"
+  echo "  curl -X POST http://localhost:8080/api/accounts -H 'Content-Type: application/json' -d '{\"username\":\"tounarti\"}'"
+  exit 1
+fi
+
+echo -e "${GREEN}Nabil ID: $NABIL_ID${NC}"
+echo -e "${GREEN}Tounarti ID: $TOUNARTI_ID${NC}"
+echo ""
+
+# Check initial balances
+echo -e "${YELLOW}Initial balances:${NC}"
+NABIL_BALANCE=$(curl -s http://localhost:8080/api/accounts/nabil | jq -r '.balance')
+TOUNARTI_BALANCE=$(curl -s http://localhost:8080/api/accounts/tounarti | jq -r '.balance')
+echo -e "${GREEN}Nabil: $NABIL_BALANCE${NC}"
+echo -e "${GREEN}Tounarti: $TOUNARTI_BALANCE${NC}"
+echo ""
+
+# Prepare the transfer payload
+PAYLOAD=$(
+  cat <<EOF
+{
+    "sourceAcountId": "$NABIL_ID",
+    "destenatioAccountId": "$TOUNARTI_ID",
+    "amount": 10.00,
+    "currency": "EUR"
+}
+EOF
+)
+
+echo -e "${YELLOW}Starting 10 concurrent transfers from Nabil to Tounarti...${NC}"
+echo -e "${RED}Each transfer should deduct $10 from Nabil and add $10 to Tounarti${NC}"
+echo -e "${RED}Expected: Nabil loses $100 (10 x $10), Tounarti gains $100${NC}"
+echo ""
+
+# Function to make concurrent requests
+make_request() {
+  local i=$1
+  local response=$(curl -s -X POST http://localhost:8080/api/transfer \
+    -H "Content-Type: application/json" \
+    -d "$PAYLOAD" 2>/dev/null)
+
+  if [[ $response == *"id"* ]]; then
+    echo -e "${GREEN}[$i] Transfer successful${NC}"
+  else
+    echo -e "${RED}[$i] Transfer failed${NC}"
+  fi
+}
+
+# Run 10 concurrent transfers (in background)
+for i in {1..10}; do
+  make_request $i &
+done
+
+# Wait for all background jobs to complete
+wait
+
+echo ""
+echo -e "${YELLOW}All transfers completed. Checking final balances...${NC}"
+echo ""
+
+# Check final balances
+NABIL_BALANCE_NEW=$(curl -s http://localhost:8080/api/accounts/nabil | jq -r '.balance')
+TOUNARTI_BALANCE_NEW=$(curl -s http://localhost:8080/api/accounts/tounarti | jq -r '.balance')
+
+echo -e "${YELLOW}=== RESULTS ===${NC}"
+echo -e "Nabil:   ${GREEN}$NABIL_BALANCE${NC} -> ${GREEN}$NABIL_BALANCE_NEW${NC} (Change: ${RED}$(echo "$NABIL_BALANCE_NEW - $NABIL_BALANCE" | bc)${NC})"
+echo -e "Tounarti: ${GREEN}$TOUNARTI_BALANCE${NC} -> ${GREEN}$TOUNARTI_BALANCE_NEW${NC} (Change: ${GREEN}$(echo "$TOUNARTI_BALANCE_NEW - $TOUNARTI_BALANCE" | bc)${NC})"
+
+echo ""
+echo -e "${YELLOW}Expected changes:${NC}"
+echo -e "Nabil should have decreased by 100.00"
+echo -e "Tounarti should have increased by 100.00"
+
+# Check if there was an issue
+EXPECTED_NABIL=$(echo "$NABIL_BALANCE - 100" | bc)
+EXPECTED_TOUNARTI=$(echo "$TOUNARTI_BALANCE + 100" | bc)
+
+if [ "$(echo "$NABIL_BALANCE_NEW == $EXPECTED_NABIL" | bc)" -eq 1 ] && [ "$(echo "$TOUNARTI_BALANCE_NEW == $EXPECTED_TOUNARTI" | bc)" -eq 1 ]; then
+  echo -e "${GREEN}✅ Balances are correct! No race condition detected.${NC}"
+else
+  echo -e "${RED}❌ Race condition detected! Balances are incorrect.${NC}"
+  echo -e "${RED}This means money was lost or created!${NC}"
+
+  # Calculate the error
+  NABIL_ERROR=$(echo "$EXPECTED_NABIL - $NABIL_BALANCE_NEW" | bc)
+  TOUNARTI_ERROR=$(echo "$EXPECTED_TOUNARTI - $TOUNARTI_BALANCE_NEW" | bc)
+  echo -e "${RED}Error in Nabil balance: $NABIL_ERROR${NC}"
+  echo -e "${RED}Error in Tounarti balance: $TOUNARTI_ERROR${NC}"
+fi

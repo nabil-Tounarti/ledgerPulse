@@ -6,6 +6,7 @@ import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,4 +26,7 @@ public class AccountEntityJpa {
 
   @Column(name = "currency", nullable = false)
   private String currency;
+
+  @Version
+  private Long version;
 }

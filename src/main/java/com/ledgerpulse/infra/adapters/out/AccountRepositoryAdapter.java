@@ -25,7 +25,12 @@ public class AccountRepositoryAdapter implements AccountRepository {
 
   @Override
   public void save(Account account) {
-    accountRepository.save(accountMapper.toEntity(account));
+    accountRepository.save(accountMapper.toNewEntity(account));
+  }
+
+  @Override
+  public void update(Account account) {
+    accountRepository.save(accountMapper.toOldEntity(account));
   }
 
   @Override

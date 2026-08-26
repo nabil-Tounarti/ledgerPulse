@@ -29,10 +29,10 @@ public class CreateTransferService implements CreateTransferUseCase {
       sender.debit(command.amount());
       receiver.credit(command.amount());
     } catch (Exception e) {
-      throw new IllegalArgumentException();
+      throw e;
     }
-    accountRepository.save(sender);
-    accountRepository.save(receiver);
+    accountRepository.update(sender);
+    accountRepository.update(receiver);
     transferRepository.save(transfer);
 
     return new TransferResponse(transfer.getTransferId().id(), sender.getUserName(), receiver.getUserName(),

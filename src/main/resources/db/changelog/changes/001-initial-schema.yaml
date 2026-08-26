@@ -1,0 +1,125 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-account-entity
+      author: nabil
+      changes:
+
+        - createTable:
+            tableName: account_entity_jpa
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: currency
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: balance
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: account_entity_jpa
+            columnNames: username
+            constraintName: uk_account_username
+
+  - changeSet:
+      id: 002-create-transfer-entity
+      author: nabil
+      changes:
+
+        - createTable:
+            tableName: transfer_entity_jpa
+            columns:
+
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: amount
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: sender_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: reciever_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: transfer_status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: transfer_entity_jpa
+            baseColumnNames: sender_id
+            referencedTableName: account_entity_jpa
+            referencedColumnNames: id
+            constraintName: fk_transfer_sender
+
+        - addForeignKeyConstraint:
+            baseTableName: transfer_entity_jpa
+            baseColumnNames: reciever_id
+            referencedTableName: account_entity_jpa
+            referencedColumnNames: id
+            constraintName: fk_transfer_receiver
+
+        - createIndex:
+            tableName: transfer_entity_jpa
+            indexName: idx_transfer_sender
+            columns:
+              - column:
+                  name: sender_id
+
+        - createIndex:
+            tableName: transfer_entity_jpa
+            indexName: idx_transfer_receiver
+            columns:
+              - column:
+                  name: reciever_id
+
+        - createIndex:
+            tableName: transfer_entity_jpa
+            indexName: idx_transfer_created_at
+            columns:
+              - column:
+                  name: created_at
